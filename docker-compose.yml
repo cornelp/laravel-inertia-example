@@ -1,0 +1,49 @@
+version: "3"
+
+services:
+    php:
+        build:
+            context: .
+            dockerfile: ./dev/php/Dockerfile
+        image: php:8.0-fpm
+        container_name: php
+        restart: unless-stopped
+        tty: true
+        volumes:
+            - ./:/var/www
+        working_dir: /var/www
+        entrypoint: ["php-fpm"]
+        ports:
+            - "9000:9000"
+
+    #Nginx Service
+    webserver:
+        image: nginx:alpine
+        container_name: nginx
+        restart: unless-stopped
+        tty: true
+        volumes:
+            - ./:/var/www
+            - ./dev/nginx/:/etc/nginx/conf.d/
+        ports:
+            - "8080:80"
+
+    #MySQL Service
+    db:
+        image: mysql:5.7.28
+        container_name: db
+        restart: unless-stopped
+        tty: true
+        volumes:
+            - db-data:/var/lib/mysql
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_USERNAME: root
+            MYSQL_DATABASE: inertia
+            MYSQL_ROOT_PASSWORD: 123
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+
+volumes:
+    db-data:
